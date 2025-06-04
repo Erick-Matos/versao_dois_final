@@ -21,7 +21,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const petForm       = document.getElementById('petForm');
   const listContainer = document.getElementById('petList');
 
-  // função única de fechar + resetar form
   function fecharModal() {
     petForm.reset();
     petForm.anuncioId.value        = '';
@@ -29,15 +28,10 @@ document.addEventListener('DOMContentLoaded', () => {
     modal.classList.remove('active');
   }
 
-  // abrir modal
   btnCriar?.addEventListener('click', () => modal.classList.add('active'));
-
-  // fechar modal: tanto clicando no overlay...
   overlay?.addEventListener('click', fecharModal);
-  // ...quanto clicando no X
   closeModalBtn?.addEventListener('click', fecharModal);
 
-  // ——— Carrega e renderiza anúncios ———
   async function loadAnuncios() {
     try {
       const res = await fetch(`${baseUrl}/anuncios`, { headers: jsonHeaders });
@@ -69,14 +63,13 @@ document.addEventListener('DOMContentLoaded', () => {
               <button class="btn-editar" data-id="${a.id}">Editar</button>
               <button class="btn-excluir" data-id="${a.id}">Excluir</button>
             ` : ''}
-          <span class="descricao-icon" title="Ver descrição" data-id="${a.id}">🛈</span>
-</div>
+            ${a.descricao ? `<span class="descricao-icon" title="Ver descrição" data-desc="${a.descricao}">🛈</span>` : ''}
+          </div>
         </div>
       `;
       listContainer.appendChild(card);
     });
 
-    // bind Excluir
     document.querySelectorAll('.btn-excluir').forEach(btn => {
       btn.addEventListener('click', async () => {
         if (!confirm('Excluir anúncio?')) return;
@@ -89,12 +82,10 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
 
-    // bind Editar
     document.querySelectorAll('.btn-editar').forEach(btn => {
       btn.addEventListener('click', () => {
         const anuncio = window._anuncios.find(a => a.id == btn.dataset.id);
         if (!anuncio) return alert('Anúncio não encontrado');
-        // preencher form
         petForm.titulo.value           = anuncio.titulo;
         petForm.descricao.value        = anuncio.descricao || '';
         petForm.idade.value            = anuncio.idade;
@@ -102,7 +93,6 @@ document.addEventListener('DOMContentLoaded', () => {
         petForm.existingImageUrl.value = anuncio.imagem || '';
         petForm.anuncioId.value        = anuncio.id;
 
-        // SEPARA CÓDIGO DO PAÍS E NÚMERO
         let cod = '55', num = '';
         if (anuncio.telefone && anuncio.telefone.startsWith('+')) {
           const match = anuncio.telefone.match(/^\+(\d{1,3})(\d{8,15})$/);
@@ -118,7 +108,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ——— Faz upload de imagem ———
   async function uploadImagem(file) {
     const fd = new FormData();
     fd.append('imagem', file);
@@ -135,7 +124,6 @@ document.addEventListener('DOMContentLoaded', () => {
     return data.image_url;
   }
 
-  // ——— Criação e Atualização de Anúncio ———
   petForm.addEventListener('submit', async e => {
     e.preventDefault();
 
@@ -148,7 +136,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const numeroTel   = petForm.numeroTelefone.value.trim();
     let   imgUrl      = petForm.existingImageUrl.value || '';
 
-    // Validação dos campos obrigatórios
     if (!nome || !idade || !codigoPais || !numeroTel || !sexo) {
       return alert('Preencha todos os campos!');
     }
@@ -160,7 +147,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     const telefone = `+${codigoPais}${numeroTel}`;
 
-    // se trocar imagem
     const fileInput = petForm.imagem;
     if (fileInput && fileInput.files.length) {
       try {
@@ -193,7 +179,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.message || `Erro ${res.status}`);
 
-      // fechar modal e recarregar
       petForm.reset();
       petForm.anuncioId.value        = '';
       petForm.existingImageUrl.value = '';
@@ -204,6 +189,22 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // inicializa
   loadAnuncios();
+
+  // ——— Modal de descrição ———
+  const modalDescricao = document.getElementById('descricaoModal');
+  const modalTexto     = document.getElementById('descricaoTexto');
+  const closeDescricao = document.getElementById('closeDescricaoModal');
+
+  document.addEventListener('click', function (e) {
+    if (e.target.classList.contains('descricao-icon')) {
+      const texto = e.target.dataset.desc || 'Sem descrição.';
+      modalTexto.textContent = texto;
+      modalDescricao.classList.add('active');
+    }
+  });
+
+  closeDescricao?.addEventListener('click', () => {
+    modalDescricao.classList.remove('active');
+  });
 });
