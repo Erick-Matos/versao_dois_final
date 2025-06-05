@@ -1,6 +1,10 @@
-from app import create_app
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
 
-app = create_app()
-
-if __name__ == '__main__':
-    app.run()
+cloudinary.config(
+  cloud_name = "SEU_CLOUD_NAME",
+  api_key = "SUA_API_KEY",
+  api_secret = "SEU_API_SECRET",
+  secure = True
+)

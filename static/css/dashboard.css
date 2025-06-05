@@ -267,3 +267,11 @@ body {
   cursor: pointer;
   color: #fe6a6e;
 }
+
+
+/* Estilo para campo de imagem */
+input[type="file"] {
+  margin-top: 10px;
+  display: block;
+  font-size: 14px;
+}

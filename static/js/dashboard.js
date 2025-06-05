@@ -108,14 +108,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  async function uploadImagem(file) {
-    const fd = new FormData();
-    fd.append('imagem', file);
-    const res = await fetch(`${baseUrl}/upload-imagem`, {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${token}` },
-      body: fd
-    });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
       throw new Error(err.error || `Falha no upload (${res.status})`);
@@ -150,7 +142,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const fileInput = petForm.imagem;
     if (fileInput && fileInput.files.length) {
       try {
-        imgUrl = await uploadImagem(fileInput.files[0]);
       } catch (err) {
         return alert(err.message);
       }
